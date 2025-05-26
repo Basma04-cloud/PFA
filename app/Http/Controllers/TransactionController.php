@@ -2,69 +2,29 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Transaction;
+use App\Models\Compte;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
 
 class TransactionController extends Controller
 {
     public function index()
     {
-        // Données de test pour les transactions
-        $transactions = [
-            [
-                'nom' => 'Courses',
-                'date' => '15/01/2024',
-                'montant' => -85.50,
-                'categorie' => 'Alimentation',
-                'icon' => 'shopping-cart'
-            ],
-            [
-                'nom' => 'Salaire',
-                'date' => '01/01/2024',
-                'montant' => 2000.00,
-                'categorie' => 'Revenus',
-                'icon' => 'money-bag'
-            ],
-            [
-                'nom' => 'Loyer',
-                'date' => '01/01/2024',
-                'montant' => -800.00,
-                'categorie' => 'Logement',
-                'icon' => 'house'
-            ],
-            [
-                'nom' => 'Restaurant',
-                'date' => '10/01/2024',
-                'montant' => -45.00,
-                'categorie' => 'Alimentation',
-                'icon' => 'shopping-cart'
-            ],
-            [
-                'nom' => 'Freelance',
-                'date' => '12/01/2024',
-                'montant' => 500.00,
-                'categorie' => 'Revenus',
-                'icon' => 'money-bag'
-            ],
-            [
-                'nom' => 'Loisirs',
-                'date' => '14/01/2024',
-                'montant' => -25.00,
-                'categorie' => 'Divertissement',
-                'icon' => 'popcorn'
-            ]
-        ];
+        // Récupérer les transactions de l'utilisateur connecté
+        $transactions = Transaction::where('user_id', Auth::id())
+                                 ->with('compte')
+                                 ->orderBy('date', 'desc')
+                                 ->orderBy('created_at', 'desc')
+                                 ->get();
 
         return view('transactions.index', compact('transactions'));
     }
 
     public function create()
     {
-        // Données de test pour les comptes
-        $comptes = [
-            (object) ['id' => 1, 'nom' => 'Compte Courant', 'solde' => 1245.50],
-            (object) ['id' => 2, 'nom' => 'Livret A', 'solde' => 5000.00],
-            (object) ['id' => 3, 'nom' => 'Carte de crédit', 'solde' => -350.00],
-        ];
+        // Récupérer les comptes de l'utilisateur pour le formulaire
+        $comptes = Compte::where('user_id', Auth::id())->get();
 
         return view('transactions.create', compact('comptes'));
     }
@@ -77,38 +37,127 @@ class TransactionController extends Controller
             'montant' => 'required|numeric',
             'date' => 'required|date',
             'categorie' => 'required|string',
-            'compte_id' => 'required|integer',
+            'compte_id' => 'required|exists:compte,id',
             'type' => 'required|in:depense,revenu,transfert',
             'description' => 'nullable|string|max:1000',
         ]);
 
-        // Ici vous ajouteriez la logique pour sauvegarder en base de données
-        // Transaction::create($validatedData);
+        // Vérifier que le compte appartient à l'utilisateur
+        $compte = Compte::where('id', $validatedData['compte_id'])
+                       ->where('user_id', Auth::id())
+                       ->firstOrFail();
+
+        // Créer la transaction
+        $transaction = Transaction::create([
+            'nom' => $validatedData['nom'],
+            'montant' => $validatedData['montant'],
+            'date' => $validatedData['date'],
+            'categorie' => $validatedData['categorie'],
+            'type' => $validatedData['type'],
+            'description' => $validatedData['description'],
+            'compte_id' => $validatedData['compte_id'],
+            'user_id' => Auth::id(),
+        ]);
+
+        // Mettre à jour le solde du compte
+        if ($validatedData['type'] === 'depense') {
+            $compte->solde -= abs($validatedData['montant']);
+        } elseif ($validatedData['type'] === 'revenu') {
+            $compte->solde += abs($validatedData['montant']);
+        }
+        $compte->save();
 
         return redirect()->route('transactions.index')->with('success', 'Transaction créée avec succès !');
     }
 
     public function show($id)
     {
-        // Logique pour afficher une transaction spécifique
-        return view('transactions.show');
+        // Récupérer la transaction de l'utilisateur connecté
+        $transaction = Transaction::where('user_id', Auth::id())
+                                 ->where('id', $id)
+                                 ->with('compte')
+                                 ->firstOrFail();
+
+        return view('transactions.show', compact('transaction'));
     }
 
     public function edit($id)
     {
-        // Logique pour éditer une transaction
-        return view('transactions.edit');
+        // Récupérer la transaction et les comptes
+        $transaction = Transaction::where('user_id', Auth::id())
+                                 ->where('id', $id)
+                                 ->firstOrFail();
+        
+        $comptes = Compte::where('user_id', Auth::id())->get();
+
+        return view('transactions.edit', compact('transaction', 'comptes'));
     }
 
     public function update(Request $request, $id)
     {
-        // Logique pour mettre à jour une transaction
-        return redirect()->route('transactions.index')->with('success', 'Transaction mise à jour !');
+        // Validation des données
+        $validatedData = $request->validate([
+            'nom' => 'required|string|max:255',
+            'montant' => 'required|numeric',
+            'date' => 'required|date',
+            'categorie' => 'required|string',
+            'compte_id' => 'required|exists:compte,id',
+            'type' => 'required|in:depense,revenu,transfert',
+            'description' => 'nullable|string|max:1000',
+        ]);
+
+        // Récupérer la transaction
+        $transaction = Transaction::where('user_id', Auth::id())
+                                 ->where('id', $id)
+                                 ->firstOrFail();
+
+        // Récupérer l'ancien et le nouveau compte
+        $ancienCompte = $transaction->compte;
+        $nouveauCompte = Compte::where('id', $validatedData['compte_id'])
+                              ->where('user_id', Auth::id())
+                              ->firstOrFail();
+
+        // Annuler l'effet de l'ancienne transaction sur l'ancien compte
+        if ($transaction->type === 'depense') {
+            $ancienCompte->solde += abs($transaction->montant);
+        } elseif ($transaction->type === 'revenu') {
+            $ancienCompte->solde -= abs($transaction->montant);
+        }
+        $ancienCompte->save();
+
+        // Mettre à jour la transaction
+        $transaction->update($validatedData);
+
+        // Appliquer l'effet de la nouvelle transaction sur le nouveau compte
+        if ($validatedData['type'] === 'depense') {
+            $nouveauCompte->solde -= abs($validatedData['montant']);
+        } elseif ($validatedData['type'] === 'revenu') {
+            $nouveauCompte->solde += abs($validatedData['montant']);
+        }
+        $nouveauCompte->save();
+
+        return redirect()->route('transactions.index')->with('success', 'Transaction mise à jour avec succès !');
     }
 
     public function destroy($id)
     {
-        // Logique pour supprimer une transaction
-        return redirect()->route('transactions.index')->with('success', 'Transaction supprimée !');
+        // Récupérer la transaction
+        $transaction = Transaction::where('user_id', Auth::id())
+                                 ->where('id', $id)
+                                 ->firstOrFail();
+
+        // Annuler l'effet de la transaction sur le compte
+        $compte = $transaction->compte;
+        if ($transaction->type === 'depense') {
+            $compte->solde += abs($transaction->montant);
+        } elseif ($transaction->type === 'revenu') {
+            $compte->solde -= abs($transaction->montant);
+        }
+        $compte->save();
+
+        // Supprimer la transaction
+        $transaction->delete();
+
+        return redirect()->route('transactions.index')->with('success', 'Transaction supprimée avec succès !');
     }
 }

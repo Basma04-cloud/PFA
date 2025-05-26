@@ -9,31 +9,27 @@ class Compte extends Model
 {
     use HasFactory;
 
-    protected $table = 'compte';
-
     protected $fillable = [
-        'nom_compte',
+        'nom',
         'type',
-        'user_id',
         'solde',
+        'description',
+        'user_id'
     ];
 
     protected $casts = [
-        'solde' => 'decimal:2',
+        'solde' => 'decimal:2'
     ];
 
-    public function utilisateur()
+    // Relation avec l'utilisateur
+    public function user()
     {
-        return $this->belongsTo(Utilisateur::class, 'user_id');
+        return $this->belongsTo(User::class);
     }
 
+    // Relation avec les transactions
     public function transactions()
     {
-        return $this->hasMany(Transaction::class, 'compte_id');
-    }
-
-    public function getFormattedSoldeAttribute()
-    {
-        return number_format($this->solde, 2, ',', ' ') . ' €';
+        return $this->hasMany(Transaction::class);
     }
 }

@@ -4,66 +4,62 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
-use Carbon\Carbon;
 
 class Transaction extends Model
 {
     use HasFactory;
 
-    protected $table = 'transaction';
-
     protected $fillable = [
+        'nom',
         'montant',
-        'type',
         'date',
-        'description',
+        'categorie',
         'compte_id',
-        'user_id',
-        'categorie_id',
+        'type',
+        'description',
+        'user_id'
     ];
 
     protected $casts = [
-        'montant' => 'decimal:2',
         'date' => 'date',
+        'montant' => 'decimal:2'
     ];
 
+    // Relation avec l'utilisateur
+    public function user()
+    {
+        return $this->belongsTo(User::class);
+    }
+
+    // Relation avec le compte
     public function compte()
     {
-        return $this->belongsTo(Compte::class, 'compte_id');
+        return $this->belongsTo(Compte::class);
     }
 
-    public function utilisateur()
+    // Accesseur pour la catégorie (si vous voulez une relation plus tard)
+    public function getCategorieAttribute($value)
     {
-        return $this->belongsTo(Utilisateur::class, 'user_id');
+        return $value;
     }
 
-    public function categorie()
+    // Scope pour les dépenses
+    public function scopeDepenses($query)
     {
-        return $this->belongsTo(Categorie::class, 'categorie_id');
+        return $query->where('montant', '<', 0);
     }
 
-    public function getFormattedMontantAttribute()
+    // Scope pour les revenus
+    public function scopeRevenus($query)
     {
-        return number_format($this->montant, 2, ',', ' ') . ' €';
+        return $query->where('montant', '>', 0);
     }
 
-    public function getFormattedDateAttribute()
+    // Scope pour le mois courant
+    public function scopeMoisCourant($query)
     {
-        return Carbon::parse($this->date)->format('d/m/Y');
-    }
-
-    public function isDepense()
-    {
-        return $this->type === 'dépense';
-    }
-
-    public function isRevenu()
-    {
-        return $this->type === 'revenu';
-    }
-
-    public function getMontantSigneAttribute()
-    {
-        return $this->isDepense() ? -$this->montant : $this->montant;
+        return $query->whereMonth('date', now()->month)
+                    ->whereYear('date', now()->year);
     }
 }
+

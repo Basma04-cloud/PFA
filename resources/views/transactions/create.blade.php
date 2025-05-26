@@ -80,17 +80,11 @@
                             <label for="compte_id" class="block text-purple-800 text-sm font-bold mb-2">Compte</label>
                             <select name="compte_id" id="compte_id" class="w-full px-3 py-2 border rounded-lg focus:outline-none focus:border-purple-500" required>
                                 <option value="">Sélectionner un compte</option>
-                                @if(isset($comptes) && count($comptes) > 0)
-                                    @foreach($comptes as $compte)
-                                        <option value="{{ $compte->id }}" {{ old('compte_id') == $compte->id ? 'selected' : '' }}>
-                                            {{ $compte->nom }} ({{ number_format($compte->solde, 2, ',', ' ') }} €)
-                                        </option>
-                                    @endforeach
-                                @else
-                                    <option value="1" {{ old('compte_id') == '1' ? 'selected' : '' }}>Compte Courant (1 245,50 €)</option>
-                                    <option value="2" {{ old('compte_id') == '2' ? 'selected' : '' }}>Livret A (5 000,00 €)</option>
-                                    <option value="3" {{ old('compte_id') == '3' ? 'selected' : '' }}>Carte de crédit (-350,00 €)</option>
-                                @endif
+                                @foreach($comptes as $compte)
+                                    <option value="{{ $compte->id }}" {{ old('compte_id') == $compte->id ? 'selected' : '' }}>
+                                        {{ $compte->nom_compte }} ({{ number_format($compte->solde, 2, ',', ' ') }} €)
+                                    </option>
+                                @endforeach
                             </select>
                         </div>
 

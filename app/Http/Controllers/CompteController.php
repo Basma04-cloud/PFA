@@ -2,82 +2,88 @@
 
 namespace App\Http\Controllers;
 
-use Illuminate\Http\Request;
 use App\Models\Compte;
+use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 
 class CompteController extends Controller
 {
+    // Affiche tous les comptes de l'utilisateur connecté
     public function index()
     {
-        $comptes = Compte::where('user_id', Auth::id())->get();
+        $comptes = Compte::where('user_id', Auth::id())
+                         ->orderBy('created_at', 'desc')
+                         ->get();
+
         return view('comptes.index', compact('comptes'));
     }
 
+    // Affiche le formulaire de création
     public function create()
     {
         return view('comptes.create');
     }
 
+    // Enregistre un nouveau compte
     public function store(Request $request)
     {
-        $request->validate([
-            'nom_compte' => 'required|string|max:255',
-            'type' => 'required|in:Epargne,Espèces,Bancaire,Crédit',
-            'solde' => 'required|numeric',
+        $validatedData = $request->validate([
+            'nom' => 'required|string|max:255',
+            'type' => 'required|in:courant,epargne,credit,investissement',
+            'solde' => 'nullable|numeric|min:0',
+            'description' => 'nullable|string',
         ]);
 
         Compte::create([
-            'nom_compte' => $request->nom_compte,
-            'type' => $request->type,
-            'solde' => $request->solde,
+            'nom' => $validatedData['nom'],
+            'type' => $validatedData['type'],
+            'solde' => $validatedData['solde'] ?? 0,
+            'description' => $validatedData['description'] ?? null,
             'user_id' => Auth::id(),
         ]);
 
-        return redirect()->route('comptes.index')->with('success', 'Compte créé avec succès!');
+        return redirect()->route('comptes.index')->with('success', 'Compte créé avec succès.');
     }
 
-    public function show(Compte $compte)
-    {
-        $this->authorize('view', $compte);
-        
-        $transactions = $compte->transactions()->with('categorie')->orderBy('date', 'desc')->paginate(10);
-        
-        return view('comptes.show', compact('compte', 'transactions'));
-    }
-
+    // Affiche le formulaire de modification
     public function edit(Compte $compte)
     {
-        $this->authorize('update', $compte);
-        
+        // Vérifie que le compte appartient à l'utilisateur
+        if ($compte->user_id !== Auth::id()) {
+            abort(403);
+        }
+
         return view('comptes.edit', compact('compte'));
     }
 
+    // Met à jour un compte
     public function update(Request $request, Compte $compte)
     {
-        $this->authorize('update', $compte);
-        
-        $request->validate([
-            'nom_compte' => 'required|string|max:255',
-            'type' => 'required|in:Epargne,Espèces,Bancaire,Crédit',
-            'solde' => 'required|numeric',
+        if ($compte->user_id !== Auth::id()) {
+            abort(403);
+        }
+
+        $validatedData = $request->validate([
+            'nom' => 'required|string|max:255',
+            'type' => 'required|in:courant,epargne,credit,investissement',
+            'solde' => 'nullable|numeric|min:0',
+            'description' => 'nullable|string',
         ]);
 
-        $compte->update([
-            'nom_compte' => $request->nom_compte,
-            'type' => $request->type,
-            'solde' => $request->solde,
-        ]);
+        $compte->update($validatedData);
 
-        return redirect()->route('comptes.index')->with('success', 'Compte mis à jour avec succès!');
+        return redirect()->route('comptes.index')->with('success', 'Compte mis à jour avec succès.');
     }
 
+    // Supprime un compte
     public function destroy(Compte $compte)
     {
-        $this->authorize('delete', $compte);
-        
+        if ($compte->user_id !== Auth::id()) {
+            abort(403);
+        }
+
         $compte->delete();
 
-        return redirect()->route('comptes.index')->with('success', 'Compte supprimé avec succès!');
+        return redirect()->route('comptes.index')->with('success', 'Compte supprimé.');
     }
 }

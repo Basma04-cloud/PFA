@@ -9,58 +9,33 @@ class Objectif extends Model
 {
     use HasFactory;
 
-    protected $table = 'objectif';
-
     protected $fillable = [
-        'nom_objectif',
-        'montant_vise',
-        'montant_atteint',
-        'echeance',
+        'nom',
         'description',
-        'user_id',
+        'montant_cible',
+        'montant_actuel',
+        'date_echeance',
+        'user_id'
     ];
 
     protected $casts = [
-        'montant_vise' => 'decimal:2',
-        'montant_atteint' => 'decimal:2',
-        'echeance' => 'date',
+        'montant_cible' => 'decimal:2',
+        'montant_actuel' => 'decimal:2',
+        'date_echeance' => 'date'
     ];
 
-    public function utilisateur()
+    // Relation avec l'utilisateur
+    public function user()
     {
-        return $this->belongsTo(Utilisateur::class, 'user_id');
+        return $this->belongsTo(User::class);
     }
 
-    public function getProgressPercentAttribute()
+    // Calculer le pourcentage de progression
+    public function getPourcentageAttribute()
     {
-        if ($this->montant_vise <= 0) {
+        if ($this->montant_cible <= 0) {
             return 0;
         }
-        
-        return min(100, round(($this->montant_atteint / $this->montant_vise) * 100));
-    }
-
-    public function getFormattedMontantViseAttribute()
-    {
-        return number_format($this->montant_vise, 2, ',', ' ') . ' €';
-    }
-
-    public function getFormattedMontantAtteintAttribute()
-    {
-        return number_format($this->montant_atteint, 2, ',', ' ') . ' €';
-    }
-
-    public function getFormattedEcheanceAttribute()
-    {
-        return $this->echeance ? $this->echeance->format('d/m/Y') : 'Non définie';
-    }
-
-    public function getRemainingDaysAttribute()
-    {
-        if (!$this->echeance) {
-            return null;
-        }
-        
-        return max(0, now()->diffInDays($this->echeance, false));
+        return ($this->montant_actuel / $this->montant_cible) * 100;
     }
 }

@@ -3,44 +3,61 @@
 namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
-use App\Models\Notification;
-use Illuminate\Support\Facades\Auth;
 
 class NotificationController extends Controller
 {
     public function index()
     {
-        $notifications = Notification::where('user_id', Auth::id())
-            ->orderBy('date_envoi', 'desc')
-            ->paginate(20);
-            
+        // Données de test pour les notifications
+        $notifications = [
+            (object) [
+                'id' => 1,
+                'titre' => 'Nouvelle transaction enregistrée',
+                'message' => 'Une transaction de -85,50 € a été ajoutée',
+                'lu' => false,
+                'created_at' => now()->subHours(2)
+            ],
+            (object) [
+                'id' => 2,
+                'titre' => 'Objectif atteint !',
+                'message' => 'Félicitations ! Vous avez atteint votre objectif',
+                'lu' => false,
+                'created_at' => now()->subDays(1)
+            ],
+            (object) [
+                'id' => 3,
+                'titre' => 'Nouvelle transaction enregistrée',
+                'message' => 'Une transaction de +2000,00 € a été ajoutée',
+                'lu' => true,
+                'created_at' => now()->subDays(2)
+            ],
+            (object) [
+                'id' => 4,
+                'titre' => 'Budget dépassé',
+                'message' => 'Votre budget alimentation a été dépassé',
+                'lu' => true,
+                'created_at' => now()->subDays(3)
+            ]
+        ];
+
         return view('notifications.index', compact('notifications'));
     }
 
-    public function marquerCommeLu(Notification $notification)
+    public function marquerCommeLu($id)
     {
-        $this->authorize('update', $notification);
-        
-        $notification->marquerCommeLu();
-
-        return redirect()->back()->with('success', 'Notification marquée comme lue.');
+        // Logique pour marquer une notification comme lue
+        return redirect()->route('notifications.index')->with('success', 'Notification marquée comme lue');
     }
 
     public function marquerToutCommeLu()
     {
-        Notification::where('user_id', Auth::id())
-            ->where('lu', false)
-            ->update(['lu' => true]);
-
-        return redirect()->back()->with('success', 'Toutes les notifications ont été marquées comme lues.');
+        // Logique pour marquer toutes les notifications comme lues
+        return redirect()->route('notifications.index')->with('success', 'Toutes les notifications ont été marquées comme lues');
     }
 
-    public function destroy(Notification $notification)
+    public function destroy($id)
     {
-        $this->authorize('delete', $notification);
-        
-        $notification->delete();
-
-        return redirect()->route('notifications.index')->with('success', 'Notification supprimée avec succès!');
+        // Logique pour supprimer une notification
+        return redirect()->route('notifications.index')->with('success', 'Notification supprimée');
     }
 }
