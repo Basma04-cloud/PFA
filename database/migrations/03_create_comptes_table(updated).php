@@ -8,7 +8,7 @@ return new class extends Migration
 {
     public function up(): void
     {
-        Schema::create('comptes', function (Blueprint $table) {
+        Schema::create('compte', function (Blueprint $table) {
             $table->id();
             $table->string('nom');
             $table->enum('type', ['courant', 'epargne', 'credit', 'investissement']);
@@ -21,6 +21,6 @@ return new class extends Migration
 
     public function down(): void
     {
-        Schema::dropIfExists('comptes');
+        Schema::dropIfExists('compte');
     }
 };

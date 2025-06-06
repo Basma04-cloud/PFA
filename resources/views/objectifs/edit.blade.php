@@ -40,44 +40,70 @@
                 </div>
                 @endif
 
-                <form method="POST" action="{{ route('objectifs.update', $objectif->id) }}">
+                <form method="POST" action="{{ route('objectifs.update', $objectif) }}" id="objectifForm">
                     @csrf
                     @method('PUT')
                     
                     <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
                         <div class="mb-6">
-                            <label for="nom" class="block text-purple-800 text-sm font-bold mb-2">Nom de l'objectif</label>
-                            <input type="text" name="nom" id="nom" value="{{ old('nom', $objectif->nom) }}" class="w-full px-3 py-2 border rounded-lg focus:outline-none focus:border-purple-500" required>
+                            <label for="nom" class="block text-purple-800 text-sm font-bold mb-2">Nom de l'objectif *</label>
+                            <input type="text" name="nom" id="nom" value="{{ old('nom', $objectif->nom) }}" 
+                                   class="w-full px-3 py-2 border rounded-lg focus:outline-none focus:border-purple-500" 
+                                   placeholder="Ex: Vacances d'été, Nouvelle voiture..." required>
                         </div>
 
                         <div class="mb-6">
-                            <label for="montant_vise" class="block text-purple-800 text-sm font-bold mb-2">Montant visé</label>
-                            <input type="number" step="0.01" name="montant_vise" id="montant_vise" value="{{ old('montant_vise', $objectif->montant_vise) }}" class="w-full px-3 py-2 border rounded-lg focus:outline-none focus:border-purple-500" required>
+                            <label for="montant_vise" class="block text-purple-800 text-sm font-bold mb-2">Montant visé *</label>
+                            <input type="number" step="0.01" min="0.01" name="montant_vise" id="montant_vise" 
+                                   value="{{ old('montant_vise', $objectif->montant_vise) }}" 
+                                   class="w-full px-3 py-2 border rounded-lg focus:outline-none focus:border-purple-500" required>
+                            <p class="text-sm text-gray-600 mt-1">Montant que vous souhaitez atteindre</p>
+                        </div>
+
+                        <div class="mb-6">
+                            <label for="date_echeance" class="block text-purple-800 text-sm font-bold mb-2">Date d'échéance *</label>
+                            <input type="date" name="date_echeance" id="date_echeance" 
+                                   value="{{ old('date_echeance', $objectif->date_echeance->format('Y-m-d')) }}" 
+                                   class="w-full px-3 py-2 border rounded-lg focus:outline-none focus:border-purple-500" required>
+                            <p class="text-sm text-gray-600 mt-1">Date limite pour atteindre votre objectif</p>
                         </div>
 
                         <div class="mb-6">
                             <label for="montant_atteint" class="block text-purple-800 text-sm font-bold mb-2">Montant atteint</label>
-                            <input type="number" step="0.01" name="montant_atteint" id="montant_atteint" value="{{ old('montant_atteint', $objectif->montant_atteint) }}" class="w-full px-3 py-2 border rounded-lg focus:outline-none focus:border-purple-500" required>
-                        </div>
-
-                        <div class="mb-6">
-                            <label for="date_echeance" class="block text-purple-800 text-sm font-bold mb-2">Date d'échéance</label>
-                            <input type="date" name="date_echeance" id="date_echeance" value="{{ old('date_echeance', $objectif->date_echeance->format('Y-m-d')) }}" class="w-full px-3 py-2 border rounded-lg focus:outline-none focus:border-purple-500" required>
-                        </div>
-
-                        <div class="mb-6 md:col-span-2">
-                            <label for="statut" class="block text-purple-800 text-sm font-bold mb-2">Statut</label>
-                            <select name="statut" id="statut" class="w-full px-3 py-2 border rounded-lg focus:outline-none focus:border-purple-500" required>
-                                <option value="actif" {{ old('statut', $objectif->statut) == 'actif' ? 'selected' : '' }}>Actif</option>
-                                <option value="atteint" {{ old('statut', $objectif->statut) == 'atteint' ? 'selected' : '' }}>Atteint</option>
-                                <option value="abandonne" {{ old('statut', $objectif->statut) == 'abandonne' ? 'selected' : '' }}>Abandonné</option>
-                            </select>
+                            <input type="number" step="0.01" min="0" name="montant_atteint" id="montant_atteint" 
+                                   value="{{ old('montant_atteint', $objectif->montant_atteint) }}" 
+                                   class="w-full px-3 py-2 border rounded-lg focus:outline-none focus:border-purple-500">
+                            <p class="text-sm text-gray-600 mt-1">Montant actuellement économisé</p>
                         </div>
                     </div>
 
                     <div class="mb-6">
-                        <label for="description" class="block text-purple-800 text-sm font-bold mb-2">Description (optionnel)</label>
-                        <textarea name="description" id="description" rows="3" class="w-full px-3 py-2 border rounded-lg focus:outline-none focus:border-purple-500" placeholder="Décrivez votre objectif...">{{ old('description', $objectif->description) }}</textarea>
+                        <label for="description" class="block text-purple-800 text-sm font-bold mb-2">Description</label>
+                        <textarea name="description" id="description" rows="3" 
+                                  class="w-full px-3 py-2 border rounded-lg focus:outline-none focus:border-purple-500" 
+                                  placeholder="Décrivez votre objectif, pourquoi il est important pour vous...">{{ old('description', $objectif->description) }}</textarea>
+                    </div>
+
+                    <!-- Aperçu de l'objectif -->
+                    <div class="mb-6 p-4 bg-purple-100 rounded-lg" id="apercu">
+                        <h3 class="text-purple-800 font-bold mb-2">Aperçu de votre objectif :</h3>
+                        <div class="grid grid-cols-2 gap-4 text-sm">
+                            <div>
+                                <span class="font-semibold">Objectif :</span> <span id="apercu-nom">{{ $objectif->nom }}</span>
+                            </div>
+                            <div>
+                                <span class="font-semibold">Montant visé :</span> <span id="apercu-montant">{{ $objectif->montant_vise_formatte }}</span>
+                            </div>
+                            <div>
+                                <span class="font-semibold">Échéance :</span> <span id="apercu-date">{{ $objectif->date_echeance->format('d/m/Y') }}</span>
+                            </div>
+                            <div>
+                                <span class="font-semibold">Montant atteint :</span> <span id="apercu-atteint">{{ $objectif->montant_atteint_formatte }}</span>
+                            </div>
+                        </div>
+                        <div class="mt-2">
+                            <span class="font-semibold">Progression :</span> <span id="apercu-progression" class="text-purple-600 font-bold">{{ number_format($objectif->pourcentage, 1) }}%</span>
+                        </div>
                     </div>
 
                     <div class="flex justify-end space-x-4">
@@ -85,7 +111,7 @@
                             Annuler
                         </a>
                         <button type="submit" class="px-6 py-2 bg-purple-800 text-white rounded-lg hover:bg-purple-700 transition-colors">
-                            Mettre à jour
+                            Mettre à jour l'objectif
                         </button>
                     </div>
                 </form>
@@ -93,4 +119,43 @@
         </div>
     </div>
 </div>
+
+<script>
+// Fonction pour mettre à jour l'aperçu
+function updateApercu() {
+    const nom = document.getElementById('nom').value;
+    const montantVise = parseFloat(document.getElementById('montant_vise').value) || 0;
+    const dateEcheance = document.getElementById('date_echeance').value;
+    const montantAtteint = parseFloat(document.getElementById('montant_atteint').value) || 0;
+    
+    document.getElementById('apercu-nom').textContent = nom || '-';
+    document.getElementById('apercu-montant').textContent = montantVise ? montantVise.toLocaleString('fr-FR', {minimumFractionDigits: 2}) + ' €' : '-';
+    document.getElementById('apercu-date').textContent = dateEcheance ? new Date(dateEcheance).toLocaleDateString('fr-FR') : '-';
+    document.getElementById('apercu-atteint').textContent = montantAtteint.toLocaleString('fr-FR', {minimumFractionDigits: 2}) + ' €';
+    
+    if (montantVise > 0) {
+        const progression = (montantAtteint / montantVise) * 100;
+        document.getElementById('apercu-progression').textContent = progression.toFixed(1) + '%';
+    } else {
+        document.getElementById('apercu-progression').textContent = '0%';
+    }
+}
+
+// Écouter les changements dans les champs
+['nom', 'montant_vise', 'date_echeance', 'montant_atteint'].forEach(id => {
+    document.getElementById(id).addEventListener('input', updateApercu);
+});
+
+// Validation du formulaire
+document.getElementById('objectifForm').addEventListener('submit', function(e) {
+    const montantVise = parseFloat(document.getElementById('montant_vise').value);
+    const montantAtteint = parseFloat(document.getElementById('montant_atteint').value) || 0;
+    
+    if (montantAtteint > montantVise && {{ $objectif->montant_atteint }} <= {{ $objectif->montant_vise }}) {
+        e.preventDefault();
+        alert('Le montant atteint ne peut pas être supérieur au montant visé (sauf si déjà dépassé)');
+        return false;
+    }
+});
+</script>
 @endsection

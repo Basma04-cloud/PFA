@@ -3,20 +3,16 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Connexion</title>
+    <title>Connexion - WalletWise</title>
     <script src="https://cdn.tailwindcss.com"></script>
-    <style>
-        .bg-purple-400 { background-color: #9d6fce; }
-        .bg-purple-800 { background-color: #5d2a81; }
-        .hover\:bg-purple-700:hover { background-color: #6b3497; }
-        .text-purple-800 { color: #5d2a81; }
-        .hover\:text-purple-700:hover { color: #6b3497; }
-    </style>
 </head>
-<body class="bg-purple-400 flex items-center justify-center min-h-screen">
-    <div class="bg-white p-8 rounded-lg shadow-md w-96">
-        <h1 class="text-2xl font-bold mb-6 text-center text-purple-800">Connexion</h1>
-        
+<body class="bg-gradient-to-br from-purple-400 to-purple-700 min-h-screen flex items-center justify-center">
+    <div class="bg-white shadow-xl rounded-xl p-10 w-full max-w-md">
+        <div class="text-center mb-8">
+            <h1 class="text-3xl font-extrabold text-purple-800">Bienvenue sur <span class="text-purple-600">WalletWise</span></h1>
+            <p class="text-gray-600 mt-2">Connectez-vous pour accéder à votre espace</p>
+        </div>
+
         @if ($errors->any())
         <div class="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded mb-4">
             <ul>
@@ -26,28 +22,33 @@
             </ul>
         </div>
         @endif
-        
+
         <form method="POST" action="{{ route('login.post') }}">
             @csrf
             <div class="mb-4">
-                <label for="email" class="block text-gray-700 text-sm font-bold mb-2">Email</label>
-                <input type="email" name="email" id="email" class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline" required>
+                <label for="email" class="block text-sm font-medium text-gray-700">Email</label>
+                <input type="email" name="email" id="email" autocomplete="email" required
+                    class="mt-1 block w-full px-4 py-2 border border-gray-300 rounded-md shadow-sm focus:ring-purple-500 focus:border-purple-500">
             </div>
-            
+
             <div class="mb-6">
-                <label for="password" class="block text-gray-700 text-sm font-bold mb-2">Mot de passe</label>
-                <input type="password" name="password" id="password" class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline" required>
+                <label for="password" class="block text-sm font-medium text-gray-700">Mot de passe</label>
+                <input type="password" name="password" id="password" autocomplete="current-password" required
+                    class="mt-1 block w-full px-4 py-2 border border-gray-300 rounded-md shadow-sm focus:ring-purple-500 focus:border-purple-500">
             </div>
-            
-            <div class="flex items-center justify-between">
-                <button type="submit" class="bg-purple-800 hover:bg-purple-700 text-white font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline transition-colors">
+
+            <div class="flex items-center justify-between mb-4">
+                <button type="submit"
+                    class="w-full bg-purple-800 hover:bg-purple-700 text-white font-bold py-2 px-4 rounded-md transition duration-300">
                     Se connecter
                 </button>
-                <a href="{{ route('register') }}" class="inline-block align-baseline font-bold text-sm text-purple-800 hover:text-purple-700 transition-colors">
-                    S'inscrire
-                </a>
+            </div>
+
+            <div class="text-center">
+                <a href="{{ route('register') }}" class="text-sm text-purple-700 hover:underline">Pas encore de compte ? S'inscrire</a>
             </div>
         </form>
     </div>
 </body>
 </html>
+

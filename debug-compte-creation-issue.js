@@ -1,0 +1,16 @@
+console.log("🔍 DIAGNOSTIC DU PROBLÈME DE CRÉATION DE COMPTE")
+console.log("==============================================\n")
+
+console.log("❌ PROBLÈMES POTENTIELS IDENTIFIÉS:")
+console.log("1. Structure de table incohérente (compte vs comptes)")
+console.log("2. Colonnes manquantes (description)")
+console.log("3. Validation incorrecte")
+console.log("4. Contraintes de clés étrangères")
+console.log("5. Problème de fillable dans le modèle\n")
+
+console.log("🛠️  SOLUTIONS À APPLIQUER:")
+console.log("1. Vérifier et corriger la structure de la table")
+console.log("2. Corriger le modèle Compte")
+console.log("3. Améliorer la validation")
+console.log("4. Ajouter des logs de debug")
+console.log("5. Créer une migration de correction\n")

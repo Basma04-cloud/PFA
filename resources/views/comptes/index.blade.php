@@ -48,8 +48,8 @@
                             </svg>
                         </div>
                         <div class="flex-1">
-                            <h3 class="text-lg font-semibold">{{ $compte->nom }}</h3>
-                            <p class="text-sm text-gray-600">{{ $compte->type }}</p>
+                            <h3 class="text-lg font-semibold">{{ $compte->nom_compte }}</h3>
+                            <p class="text-sm text-gray-600">{{ $compte->type_compte }}</p>
                             <p class="text-lg font-bold mt-2 {{ $compte->solde >= 0 ? 'text-green-600' : 'text-red-600' }}">
                                 {{ number_format($compte->solde, 2, ',', ' ') }} MAD
                             </p>

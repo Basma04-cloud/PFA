@@ -1,6 +1,6 @@
 @extends('layouts.app')
 
-@section('title', 'Modifier le compte')
+@section('title', 'Modifier le Compte')
 
 @section('content')
 <div class="flex h-screen bg-purple-400">
@@ -26,10 +26,10 @@
         <div class="max-w-2xl mx-auto">
             <div class="flex items-center mb-8">
                 <a href="{{ route('comptes.index') }}" class="text-white hover:text-gray-300 mr-4">← Retour</a>
-                <h2 class="text-2xl text-white font-bold">Modifier le compte</h2>
+                <h2 class="text-3xl text-white font-bold">Modifier le Compte</h2>
             </div>
 
-            <div class="bg-gray-200 rounded-lg p-8">
+            <div class="bg-gray-300 rounded-lg p-8">
                 @if ($errors->any())
                 <div class="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded mb-4">
                     <ul>
@@ -40,37 +40,49 @@
                 </div>
                 @endif
 
-                <form method="POST" action="{{ route('comptes.update', $compte->id) }}">
+                <form method="POST" action="{{ route('comptes.update', $compte) }}">
                     @csrf
                     @method('PUT')
                     
-                    <div class="mb-6">
-                        <label for="nom" class="block text-gray-700 text-sm font-bold mb-2">Nom du compte</label>
-                        <input type="text" name="nom" id="nom" value="{{ old('nom', $compte->nom) }}" class="w-full px-3 py-2 border rounded-lg focus:outline-none focus:border-purple-500" required>
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                        <div class="mb-6">
+                            <label for="nom_compte" class="block text-purple-800 text-sm font-bold mb-2">Nom du compte *</label>
+                            <input type="text" name="nom_compte" id="nom_compte" value="{{ old('nom_compte', $compte->nom_compte) }}" 
+                                   class="w-full px-3 py-2 border rounded-lg focus:outline-none focus:border-purple-500" required>
+                        </div>
+
+                        <div class="mb-6">
+                            <label for="type_compte" class="block text-purple-800 text-sm font-bold mb-2">Type de compte *</label>
+                            <select name="type_compte" id="type_compte" class="w-full px-3 py-2 border rounded-lg focus:outline-none focus:border-purple-500" required>
+                                <option value="">Sélectionner un type</option>
+                                <option value="courant" {{ old('type_compte', $compte->type_compte) == 'courant' ? 'selected' : '' }}>Compte Courant</option>
+                                <option value="epargne" {{ old('type_compte', $compte->type_compte) == 'epargne' ? 'selected' : '' }}>Compte Épargne</option>
+                                <option value="credit" {{ old('type_compte', $compte->type_compte) == 'credit' ? 'selected' : '' }}>Compte Crédit</option>
+                                <option value="investissement" {{ old('type_compte', $compte->type_compte) == 'investissement' ? 'selected' : '' }}>Compte Investissement</option>
+                            </select>
+                        </div>
+
+                        <div class="mb-6 md:col-span-2">
+                            <label for="solde" class="block text-purple-800 text-sm font-bold mb-2">Solde</label>
+                            <input type="number" step="0.01" min="0" name="solde" id="solde" value="{{ old('solde', $compte->solde) }}" 
+                                   class="w-full px-3 py-2 border rounded-lg focus:outline-none focus:border-purple-500">
+                            <p class="text-sm text-gray-600 mt-1">Modifiez le solde si nécessaire</p>
+                        </div>
                     </div>
 
                     <div class="mb-6">
-                        <label for="type" class="block text-gray-700 text-sm font-bold mb-2">Type de compte</label>
-                        <select name="type" id="type" class="w-full px-3 py-2 border rounded-lg focus:outline-none focus:border-purple-500" required>
-                            <option value="">Sélectionner un type</option>
-                            <option value="courant" {{ (old('type', $compte->type) == 'courant') ? 'selected' : '' }}>Courant</option>
-                            <option value="epargne" {{ (old('type', $compte->type) == 'epargne') ? 'selected' : '' }}>Épargne</option>
-                            <option value="credit" {{ (old('type', $compte->type) == 'credit') ? 'selected' : '' }}>Crédit</option>
-                            <option value="investissement" {{ (old('type', $compte->type) == 'investissement') ? 'selected' : '' }}>Investissement</option>
-                        </select>
-                    </div>
-
-                    <div class="mb-6">
-                        <label for="solde" class="block text-gray-700 text-sm font-bold mb-2">Solde actuel</label>
-                        <input type="number" step="0.01" name="solde" id="solde" value="{{ old('solde', $compte->solde) }}" class="w-full px-3 py-2 border rounded-lg focus:outline-none focus:border-purple-500" required>
+                        <label for="description" class="block text-purple-800 text-sm font-bold mb-2">Description</label>
+                        <textarea name="description" id="description" rows="3" 
+                                  class="w-full px-3 py-2 border rounded-lg focus:outline-none focus:border-purple-500" 
+                                  placeholder="Description optionnelle du compte...">{{ old('description', $compte->description ?? '') }}</textarea>
                     </div>
 
                     <div class="flex justify-end space-x-4">
-                        <a href="{{ route('comptes.index') }}" class="px-6 py-2 border border-gray-400 rounded-lg hover:bg-gray-300 transition-colors">
+                        <a href="{{ route('comptes.index') }}" class="px-6 py-2 border border-gray-400 rounded-lg hover:bg-gray-100 transition-colors">
                             Annuler
                         </a>
                         <button type="submit" class="px-6 py-2 bg-purple-800 text-white rounded-lg hover:bg-purple-700 transition-colors">
-                            Enregistrer
+                            Mettre à jour
                         </button>
                     </div>
                 </form>

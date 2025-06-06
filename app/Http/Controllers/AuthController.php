@@ -26,10 +26,18 @@ class AuthController extends Controller
             'password' => ['required'],
         ]);
 
+         
         if (Auth::attempt($credentials)) {
-            $request->session()->regenerate();
-            return redirect()->intended('dashboard');
-        }
+    $request->session()->regenerate();
+
+    $user = Auth::user();
+    if ($user->role === 'admin') {
+        return redirect()->route('admin.dashboard');
+    } else {
+        return redirect()->route('dashboard');
+    }
+}
+
 
         return back()->withErrors([
             'email' => 'Les identifiants fournis ne correspondent pas à nos enregistrements.',
@@ -38,11 +46,15 @@ class AuthController extends Controller
 
     public function enregistrer(Request $request)
     {
+        
+
         // Validation des données
+        
         $validatedData = $request->validate([
-            'name' => ['required', 'string', 'max:255'],
-            'email' => ['required', 'string', 'email', 'max:255', 'unique:users'],
-            'password' => ['required', 'string', 'min:8', 'confirmed'],
+    'name' => ['required', 'string', 'max:255'],
+    'email' => ['required', 'string', 'email', 'max:255', 'unique:users'],
+    'password' => ['required', 'string', 'min:8', 'confirmed'],
+    'role' => ['required', 'in:user,admin'],  
         ]);
 
         try {
@@ -51,13 +63,21 @@ class AuthController extends Controller
                 'name' => $validatedData['name'],
                 'email' => $validatedData['email'],
                 'password' => Hash::make($validatedData['password']),
+                'role' => $validatedData['role']
             ]);
 
             // Connexion automatique de l'utilisateur
             Auth::login($user);
 
             // Redirection vers le dashboard avec un message de succès
-            return redirect('dashboard')->with('success', 'Inscription réussie ! Bienvenue ' . $user->name);
+            
+     // Redirection selon le rôle
+        if ($user->role === 'admin') {
+            return redirect()->route('admin.dashboard')->with('success', 'Bienvenue Admin ' . $user->name);
+}       else {
+            return redirect()->route('dashboard')->with('success', 'Bienvenue ' . $user->name);
+        }
+
 
         } catch (\Exception $e) {
             // En cas d'erreur, retourner avec un message d'erreur
@@ -65,6 +85,8 @@ class AuthController extends Controller
                 'email' => 'Une erreur est survenue lors de l\'inscription. Veuillez réessayer.'
             ])->withInput($request->except('password', 'password_confirmation'));
         }
+        dd(Auth::user()->role);
+
     }
 
     public function deconnexion(Request $request)

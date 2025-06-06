@@ -7,6 +7,12 @@ use Illuminate\Auth\Listeners\SendEmailVerificationNotification;
 use Illuminate\Foundation\Support\Providers\EventServiceProvider as ServiceProvider;
 use Illuminate\Support\Facades\Event;
 
+// Ajouter les imports
+use App\Models\Transaction;
+use App\Models\Objectif;
+use App\Observers\TransactionObserver;
+use App\Observers\ObjectifObserver;
+
 class EventServiceProvider extends ServiceProvider
 {
     /**
@@ -22,20 +28,18 @@ class EventServiceProvider extends ServiceProvider
 
     /**
      * Register any events for your application.
-     *
-     * @return void
      */
-    public function boot()
+    public function boot(): void
     {
-        //
+        // Enregistrer les observers
+        Transaction::observe(TransactionObserver::class);
+        Objectif::observe(ObjectifObserver::class);
     }
 
     /**
-     * Determine if events and listeners should be automatically discovered.
-     *
-     * @return bool
+     * Determine if events and listeners should be discovered.
      */
-    public function shouldDiscoverEvents()
+    public function shouldDiscoverEvents(): bool
     {
         return false;
     }

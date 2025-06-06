@@ -12,7 +12,7 @@ return new class extends Migration
             $table->id();
             $table->string('nom');
             $table->text('description')->nullable();
-            $table->decimal('montant_cible', 10, 2);
+            $table->decimal('montant_atteint', 10, 2);
             $table->decimal('montant_actuel', 10, 2)->default(0);
             $table->date('date_echeance');
             $table->foreignId('user_id')->constrained()->onDelete('cascade');
@@ -24,4 +24,4 @@ return new class extends Migration
     {
         Schema::dropIfExists('objectifs');
     }
-};
+}; // 👈 CE POINT-VIRGULE ÉTAIT MANQUANT

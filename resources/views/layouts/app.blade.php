@@ -5,6 +5,8 @@
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <meta name="csrf-token" content="{{ csrf_token() }}">
 
+
+
     <title>@yield('title', 'Dashboard') - {{ config('app.name', 'Laravel') }}</title>
 
     <!-- Fonts -->
@@ -225,5 +227,9 @@
     </script>
 
     @stack('scripts')
+    @if(Auth::check() && Auth::user()->is_admin)
+    <a href="{{ route('admin.dashboard') }}">Admin</a>
+    @endif
+
 </body>
 </html>

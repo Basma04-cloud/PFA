@@ -3,20 +3,17 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Inscription</title>
+    <title>Inscription - WalletWise</title>
     <script src="https://cdn.tailwindcss.com"></script>
-    <style>
-        .bg-purple-400 { background-color: #9d6fce; }
-        .bg-purple-800 { background-color: #5d2a81; }
-        .hover\:bg-purple-700:hover { background-color: #6b3497; }
-        .text-purple-800 { color: #5d2a81; }
-        .hover\:text-purple-700:hover { color: #6b3497; }
-    </style>
 </head>
-<body class="bg-purple-400 flex items-center justify-center min-h-screen">
-    <div class="bg-white p-8 rounded-lg shadow-md w-96">
-        <h1 class="text-2xl font-bold mb-6 text-center text-purple-800">Inscription</h1>
-        
+<body class="bg-gradient-to-br from-purple-400 to-purple-700 min-h-screen flex items-center justify-center">
+    <div class="bg-white shadow-xl rounded-xl p-10 w-full max-w-md">
+        <!-- Titre -->
+        <div class="text-center mb-6">
+            <h1 class="text-3xl font-extrabold text-purple-800">Créer un compte</h1>
+         <p  class="text-gray-600 mt-2">Rejoignez WalletWise dès maintenant</p>
+        </div>
+
         @if ($errors->any())
         <div class="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded mb-4">
             <ul>
@@ -26,38 +23,53 @@
             </ul>
         </div>
         @endif
-        
+
         <form method="POST" action="{{ route('register.post') }}">
             @csrf
             <div class="mb-4">
-                <label for="name" class="block text-gray-700 text-sm font-bold mb-2">Nom</label>
-                <input type="text" name="name" id="name" value="{{ old('name') }}" class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline" required>
+                <label for="name" class="block text-sm font-medium text-gray-700">Nom</label>
+                <input type="text" name="name" id="name" value="{{ old('name') }}" required
+                    class="mt-1 block w-full px-4 py-2 border border-gray-300 rounded-md shadow-sm focus:ring-purple-500 focus:border-purple-500">
             </div>
-            
+
             <div class="mb-4">
-                <label for="email" class="block text-gray-700 text-sm font-bold mb-2">Email</label>
-                <input type="email" name="email" id="email" value="{{ old('email') }}" class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline" required>
+                <label for="email" class="block text-sm font-medium text-gray-700">Email</label>
+                <input type="email" name="email" id="email" value="{{ old('email') }}" required
+                    class="mt-1 block w-full px-4 py-2 border border-gray-300 rounded-md shadow-sm focus:ring-purple-500 focus:border-purple-500">
             </div>
-            
+
             <div class="mb-4">
-                <label for="password" class="block text-gray-700 text-sm font-bold mb-2">Mot de passe</label>
-                <input type="password" name="password" id="password" class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline" required>
+                <label for="password" class="block text-sm font-medium text-gray-700">Mot de passe</label>
+                <input type="password" name="password" id="password" required
+                    class="mt-1 block w-full px-4 py-2 border border-gray-300 rounded-md shadow-sm focus:ring-purple-500 focus:border-purple-500">
             </div>
-            
+
+            <div class="mb-4">
+                <label for="password_confirmation" class="block text-sm font-medium text-gray-700">Confirmer le mot de passe</label>
+                <input type="password" name="password_confirmation" id="password_confirmation" required
+                    class="mt-1 block w-full px-4 py-2 border border-gray-300 rounded-md shadow-sm focus:ring-purple-500 focus:border-purple-500">
+            </div>
+
             <div class="mb-6">
-                <label for="password_confirmation" class="block text-gray-700 text-sm font-bold mb-2">Confirmer le mot de passe</label>
-                <input type="password" name="password_confirmation" id="password_confirmation" class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline" required>
+                <label for="role" class="block text-sm font-medium text-gray-700">Rôle</label>
+                <select name="role" id="role" required
+                    class="mt-1 block w-full px-4 py-2 border border-gray-300 rounded-md shadow-sm focus:ring-purple-500 focus:border-purple-500">
+                    <option value="user" {{ old('role') == 'user' ? 'selected' : '' }}>Utilisateur</option>
+                    <option value="admin" {{ old('role') == 'admin' ? 'selected' : '' }}>Administrateur</option>
+                </select>
             </div>
-            
-            <div class="flex items-center justify-between">
-                <button type="submit" class="bg-purple-800 hover:bg-purple-700 text-white font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline transition-colors">
-                    S'inscrire
-                </button>
-                <a href="{{ route('login') }}" class="inline-block align-baseline font-bold text-sm text-purple-800 hover:text-purple-700 transition-colors">
-                    Se connecter
-                </a>
+
+            <button type="submit"
+                class="w-full bg-purple-800 hover:bg-purple-700 text-white font-bold py-2 px-4 rounded-md transition duration-300">
+                S'inscrire
+            </button>
+
+            <div class="text-center mt-4">
+                <a href="{{ route('login') }}" class="text-sm text-purple-700 hover:underline">Déjà inscrit ? Se connecter</a>
             </div>
         </form>
     </div>
 </body>
 </html>
+
+

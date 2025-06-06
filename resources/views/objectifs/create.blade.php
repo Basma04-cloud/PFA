@@ -40,34 +40,80 @@
                 </div>
                 @endif
 
-                <form method="POST" action="{{ route('objectifs.store') }}">
+                <form method="POST" action="{{ route('objectifs.store') }}" id="objectifForm">
                     @csrf
                     
                     <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
                         <div class="mb-6">
-                            <label for="nom" class="block text-purple-800 text-sm font-bold mb-2">Nom de l'objectif</label>
-                            <input type="text" name="nom" id="nom" value="{{ old('nom') }}" class="w-full px-3 py-2 border rounded-lg focus:outline-none focus:border-purple-500" required>
+                            <label for="nom" class="block text-purple-800 text-sm font-bold mb-2">Nom de l'objectif *</label>
+                            <input type="text" name="nom" id="nom" value="{{ old('nom') }}" 
+                                   class="w-full px-3 py-2 border rounded-lg focus:outline-none focus:border-purple-500" 
+                                   placeholder="Ex: Vacances d'été, Nouvelle voiture..." required>
                         </div>
 
                         <div class="mb-6">
-                            <label for="montant_vise" class="block text-purple-800 text-sm font-bold mb-2">Montant visé</label>
-                            <input type="number" step="0.01" name="montant_vise" id="montant_vise" value="{{ old('montant_vise') }}" class="w-full px-3 py-2 border rounded-lg focus:outline-none focus:border-purple-500" required>
+                            <label for="montant_vise" class="block text-purple-800 text-sm font-bold mb-2">Montant visé *</label>
+                            <input type="number" step="0.01" min="0.01" name="montant_vise" id="montant_vise" value="{{ old('montant_vise') }}" 
+                                   class="w-full px-3 py-2 border rounded-lg focus:outline-none focus:border-purple-500" required>
+                            <p class="text-sm text-gray-600 mt-1">Montant que vous souhaitez atteindre</p>
                         </div>
 
                         <div class="mb-6">
-                            <label for="date_echeance" class="block text-purple-800 text-sm font-bold mb-2">Date d'échéance</label>
-                            <input type="date" name="date_echeance" id="date_echeance" value="{{ old('date_echeance') }}" class="w-full px-3 py-2 border rounded-lg focus:outline-none focus:border-purple-500" required>
+                            <label for="date_echeance" class="block text-purple-800 text-sm font-bold mb-2">Date d'échéance *</label>
+                            <input type="date" name="date_echeance" id="date_echeance" value="{{ old('date_echeance') }}" 
+                                   class="w-full px-3 py-2 border rounded-lg focus:outline-none focus:border-purple-500" 
+                                   min="{{ date('Y-m-d', strtotime('+1 day')) }}" required>
+                            <p class="text-sm text-gray-600 mt-1">Date limite pour atteindre votre objectif</p>
                         </div>
 
                         <div class="mb-6">
-                            <label for="montant_initial" class="block text-purple-800 text-sm font-bold mb-2">Montant initial (optionnel)</label>
-                            <input type="number" step="0.01" name="montant_initial" id="montant_initial" value="{{ old('montant_initial', '0') }}" class="w-full px-3 py-2 border rounded-lg focus:outline-none focus:border-purple-500">
+                            <label for="montant_initial" class="block text-purple-800 text-sm font-bold mb-2">Montant initial</label>
+                            <input type="number" step="0.01" min="0" name="montant_initial" id="montant_initial" value="{{ old('montant_initial', '0') }}" 
+                                class="w-full px-3 py-2 border rounded-lg focus:outline-none focus:border-purple-500">
+                            <p class="text-sm text-gray-600 mt-1">Montant déjà économisé (optionnel)</p>
                         </div>
                     </div>
+                    <div class="mb-6">
+                           <label for="compte_id" class="block text-purple-800 text-sm font-bold mb-2">Compte source *</label>
+                            <select name="compte_id" id="compte_id" required
+                            class="w-full px-3 py-2 border rounded-lg focus:outline-none focus:border-purple-500">
+                                <option value="">-- Sélectionnez un compte --</option>
+                                @foreach ($comptes as $compte)
+                                        <option value="{{ $compte->id }}" {{ old('compte_id') == $compte->id ? 'selected' : '' }}>
+                                        {{ $compte->nom_compte }} ({{ $compte->type_compte}}) - {{ number_format($compte->solde, 2) }} MAD
+                                </option>
+                                @endforeach
+                            </select>
+                    </div>
+
 
                     <div class="mb-6">
-                        <label for="description" class="block text-purple-800 text-sm font-bold mb-2">Description (optionnel)</label>
-                        <textarea name="description" id="description" rows="3" class="w-full px-3 py-2 border rounded-lg focus:outline-none focus:border-purple-500" placeholder="Décrivez votre objectif...">{{ old('description') }}</textarea>
+                        <label for="description" class="block text-purple-800 text-sm font-bold mb-2">Description</label>
+                        <textarea name="description" id="description" rows="3" 
+                                  class="w-full px-3 py-2 border rounded-lg focus:outline-none focus:border-purple-500" 
+                                  placeholder="Décrivez votre objectif, pourquoi il est important pour vous...">{{ old('description') }}</textarea>
+                    </div>
+
+                    <!-- Aperçu de l'objectif -->
+                    <div class="mb-6 p-4 bg-purple-100 rounded-lg" id="apercu" style="display: none;">
+                        <h3 class="text-purple-800 font-bold mb-2">Aperçu de votre objectif :</h3>
+                        <div class="grid grid-cols-2 gap-4 text-sm">
+                            <div>
+                                <span class="font-semibold">Objectif :</span> <span id="apercu-nom">-</span>
+                            </div>
+                            <div>
+                                <span class="font-semibold">Montant visé :</span> <span id="apercu-montant">-</span>
+                            </div>
+                            <div>
+                                <span class="font-semibold">Échéance :</span> <span id="apercu-date">-</span>
+                            </div>
+                            <div>
+                                <span class="font-semibold">Montant initial :</span> <span id="apercu-initial">-</span>
+                            </div>
+                        </div>
+                        <div class="mt-2">
+                            <span class="font-semibold">Montant restant :</span> <span id="apercu-restant" class="text-purple-600 font-bold">-</span>
+                        </div>
                     </div>
 
                     <div class="flex justify-end space-x-4">
@@ -83,4 +129,53 @@
         </div>
     </div>
 </div>
+
+<script>
+// Fonction pour mettre à jour l'aperçu
+function updateApercu() {
+    const nom = document.getElementById('nom').value;
+    const montantVise = parseFloat(document.getElementById('montant_vise').value) || 0;
+    const dateEcheance = document.getElementById('date_echeance').value;
+    const montantInitial = parseFloat(document.getElementById('montant_initial').value) || 0;
+    
+    if (nom || montantVise || dateEcheance) {
+        document.getElementById('apercu').style.display = 'block';
+        
+        document.getElementById('apercu-nom').textContent = nom || '-';
+        document.getElementById('apercu-montant').textContent = montantVise ? montantVise.toLocaleString('fr-FR', {minimumFractionDigits: 2}) + ' €' : '-';
+        document.getElementById('apercu-date').textContent = dateEcheance ? new Date(dateEcheance).toLocaleDateString('fr-FR') : '-';
+        document.getElementById('apercu-initial').textContent = montantInitial.toLocaleString('fr-FR', {minimumFractionDigits: 2}) + ' €';
+        
+        const montantRestant = Math.max(montantVise - montantInitial, 0);
+        document.getElementById('apercu-restant').textContent = montantRestant.toLocaleString('fr-FR', {minimumFractionDigits: 2}) + ' €';
+    } else {
+        document.getElementById('apercu').style.display = 'none';
+    }
+}
+
+// Écouter les changements dans les champs
+['nom', 'montant_vise', 'date_echeance', 'montant_initial'].forEach(id => {
+    document.getElementById(id).addEventListener('input', updateApercu);
+});
+
+// Validation du formulaire
+document.getElementById('objectifForm').addEventListener('submit', function(e) {
+    const montantVise = parseFloat(document.getElementById('montant_vise').value);
+    const montantInitial = parseFloat(document.getElementById('montant_initial').value) || 0;
+    const dateEcheance = new Date(document.getElementById('date_echeance').value);
+    const aujourd_hui = new Date();
+    
+    if (montantInitial > montantVise) {
+        e.preventDefault();
+        alert('Le montant initial ne peut pas être supérieur au montant visé');
+        return false;
+    }
+    
+    if (dateEcheance <= aujourd_hui) {
+        e.preventDefault();
+        alert('La date d\'échéance doit être dans le futur');
+        return false;
+    }
+});
+</script>
 @endsection

@@ -1,0 +1,16 @@
+console.log("🔍 SYSTÈME DE NOTIFICATIONS EN TEMPS RÉEL")
+console.log("=========================================\n")
+
+console.log("✅ ÉVÉNEMENTS À NOTIFIER IMMÉDIATEMENT:")
+console.log("1. Objectif atteint ou dépassé")
+console.log("2. Budget dépassé par catégorie")
+console.log("3. Solde de compte négatif")
+console.log("4. Grosse transaction (> seuil)")
+console.log("5. Échéance d'objectif proche")
+console.log("6. Objectif en retard\n")
+
+console.log("🛠️  IMPLÉMENTATION:")
+console.log("1. Observers pour détecter les changements")
+console.log("2. Service de notifications automatiques")
+console.log("3. Vérifications lors des transactions")
+console.log("4. Tâches planifiées pour les rappels\n")
